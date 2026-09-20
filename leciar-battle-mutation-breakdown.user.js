@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Leciel Arcadia: 戦闘詳細・変調内訳
 // @namespace    local.leciar-tools
-// @version      1.8.2
+// @version      1.8.3
 // @author        logel0
 // @contributor   GPT-5.6 (OpenAI Codex)
 // @description  【非公式・サイト運営者とは無関係】戦闘詳細の効果内訳を表示します。サイト更新により動作しなくなる場合があります。
@@ -43,9 +43,9 @@
     ...['攻増', '守増', '速増', '攻減', '守減', '速減'].map((name) => [name, 'status']),
   ]);
   const statusBackgroundColors = {
-    good: 'rgba(46, 160, 90, 0.82)',
-    bad: 'rgba(190, 55, 58, 0.82)',
-    status: 'rgba(190, 137, 24, 0.85)',
+    good: '#2ea05a',
+    bad: '#be373a',
+    status: '#be8918',
   };
 
   // 保護・阻害で 0 になった試行、経過ターンによる状態変化は集計しない。
