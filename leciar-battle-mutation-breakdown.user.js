@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Leciel Arcadia: 戦闘詳細・変調内訳
 // @namespace    local.leciar-tools
-// @version      1.8.0
+// @version      1.8.1
 // @author        logel0
 // @contributor   GPT-5.6 (OpenAI Codex)
 // @description  【非公式・サイト運営者とは無関係】戦闘詳細の効果内訳を表示します。サイト更新により動作しなくなる場合があります。
@@ -42,6 +42,11 @@
     ...['猛毒', '凍結', '呪縛', '麻痺', '阻害'].map((name) => [name, 'bad']),
     ...['攻増', '守増', '速増', '攻減', '守減', '速減'].map((name) => [name, 'status']),
   ]);
+  const statusBackgroundColors = {
+    good: 'rgba(46, 160, 90, 0.82)',
+    bad: 'rgba(190, 55, 58, 0.82)',
+    status: 'rgba(190, 137, 24, 0.85)',
+  };
 
   // 保護・阻害で 0 になった試行、経過ターンによる状態変化は集計しない。
   // サイト側のHTMLでは、タグ境界の前後に空白がある場合とない場合が混在する。
@@ -161,10 +166,7 @@
       .leciar-mutation-impact-note { margin: 7px 0 0; color: rgba(255,255,255,.7); font-size: .85em; }
       .leciar-impact-positive { color: #a9edc1; }
       .leciar-impact-negative { color: #ffaaa8; }
-      .leciar-status-kind { box-sizing: border-box; border: 2px solid transparent; border-radius: 5px; }
-      .leciar-status-kind-good { background: rgba(46, 160, 90, .72) !important; border-color: #8ce8ac; }
-      .leciar-status-kind-bad { background: rgba(190, 55, 58, .72) !important; border-color: #ff9b99; }
-      .leciar-status-kind-status { background: rgba(190, 137, 24, .75) !important; border-color: #ffe08a; }
+      img.status-icon.leciar-status-kind { box-sizing: border-box; border: 1px solid rgba(255,255,255,.55); border-radius: 4px; }
       .leciar-status-legend { margin: 6px 0 10px; font-size: .78em; color: rgba(255,255,255,.82); }
       .leciar-status-legend span { display: inline-block; margin-right: 8px; padding: 1px 6px; border-radius: 4px; }
       .leciar-status-legend .good { background: rgba(46, 160, 90, .72); }
@@ -427,7 +429,11 @@
       const name = state.dataset.tooltip?.trim() ?? '';
       const kind = statusKinds.get(name);
       if (!kind) continue;
-      state.classList.add('leciar-status-kind', `leciar-status-kind-${kind}`);
+      const icon = state.querySelector('img.status-icon');
+      if (!icon) continue;
+      icon.classList.add('leciar-status-kind');
+      // サイト側の状態表示と同じ画像要素へ直接指定し、element.styleにも反映させる。
+      icon.style.backgroundColor = statusBackgroundColors[kind];
       state.title = `${kind === 'good' ? '良性' : kind === 'bad' ? '悪性' : '能力変化'}：${name}`;
     }
 
