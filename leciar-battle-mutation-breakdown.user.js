@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Leciel Arcadia: 戦闘詳細・変調内訳 [Beta]
 // @namespace    local.leciar-tools.beta
-// @version      1.8.3-beta.2
+// @version      1.8.3-beta.3
 // @author        logel0
 // @contributor   GPT-5.6 (OpenAI Codex)
 // @description  【Beta・非公式・サイト運営者とは無関係】公開前の戦闘表示機能を試す開発版です。不具合を含む可能性があります。
@@ -48,6 +48,9 @@
     bad: '#be373a',
     status: '#be8918',
   };
+  const statusColorCss = [...statusKinds]
+    .map(([name, kind]) => `.status-icon-area .state[data-tooltip="${name}"] > img.status-icon { background-color: ${statusBackgroundColors[kind]} !important; }`)
+    .join('\n');
 
   // 保護・阻害で 0 になった試行、経過ターンによる状態変化は集計しない。
   // サイト側のHTMLでは、タグ境界の前後に空白がある場合とない場合が混在する。
@@ -172,6 +175,7 @@
       .leciar-status-legend .good { background: rgba(46, 160, 90, .72); }
       .leciar-status-legend .bad { background: rgba(190, 55, 58, .72); }
       .leciar-status-legend .status { background: rgba(190, 137, 24, .75); }
+      ${statusColorCss}
     `;
     document.head.append(style);
   }
@@ -463,44 +467,11 @@
     anchor.insertAdjacentElement('afterend', legend);
   }
 
-  function observeStatusIconChanges() {
-    const battle = document.querySelector('.battle-result');
-    if (!battle || battle.dataset.leciarStatusObserver === '1') return;
-    battle.dataset.leciarStatusObserver = '1';
-    const pending = new Set();
-    let animationFrame = 0;
-
-    const queue = (node) => {
-      const element = node instanceof Element ? node : node.parentElement;
-      if (!element) return;
-      pending.add(element);
-      if (animationFrame) return;
-      animationFrame = requestAnimationFrame(() => {
-        animationFrame = 0;
-        for (const root of pending) applyStatusIconColors(root);
-        pending.clear();
-      });
-    };
-
-    new MutationObserver((mutations) => {
-      for (const mutation of mutations) {
-        if (mutation.type === 'attributes') queue(mutation.target);
-        for (const node of mutation.addedNodes) queue(node);
-      }
-    }).observe(battle, {
-      subtree: true,
-      childList: true,
-      attributes: true,
-      attributeFilter: ['style', 'data-tooltip', 'src'],
-    });
-  }
-
   function apply() {
     if (!document.querySelector('.battle-result')) return;
     installStyle();
     applyStatusIconColors();
     appendStatusLegend();
-    observeStatusIconChanges();
     const { byActor, byActorAndSkill, originalByActorAndDisplay } = collect();
     appendImpactPanel(collectPreventedEffects(collectMutationImpacts()));
 
