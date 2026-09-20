@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Leciel Arcadia: 戦闘詳細・変調内訳 [Beta]
 // @namespace    local.leciar-tools.beta
-// @version      1.8.3-beta.1
+// @version      1.8.3-beta.2
 // @author        logel0
 // @contributor   GPT-5.6 (OpenAI Codex)
 // @description  【Beta・非公式・サイト運営者とは無関係】公開前の戦闘表示機能を試す開発版です。不具合を含む可能性があります。
@@ -422,20 +422,33 @@
     summaryWrap.insertAdjacentElement('afterend', panel);
   }
 
-  function applyStatusIconColors() {
-    const states = document.querySelectorAll('.status-icon-area .state[data-tooltip]');
-    if (!states.length) return;
-    for (const state of states) {
-      const name = state.dataset.tooltip?.trim() ?? '';
-      const kind = statusKinds.get(name);
-      if (!kind) continue;
-      const icon = state.querySelector('img.status-icon');
-      if (!icon) continue;
-      // サイト側の状態表示と同じ画像要素へ直接指定し、element.styleにも反映させる。
+  function colorStatusState(state) {
+    if (!state?.matches('.status-icon-area .state[data-tooltip]')) return;
+    const name = state.dataset.tooltip?.trim() ?? '';
+    const kind = statusKinds.get(name);
+    if (!kind) return;
+    const icon = state.querySelector('img.status-icon');
+    if (!icon) return;
+    // サイト側の差し替えでstyleが消えた場合も、画像要素へ直接設定し直す。
+    if (!icon.style.backgroundColor || icon.dataset.leciarStatusKind !== kind) {
       icon.style.backgroundColor = statusBackgroundColors[kind];
-      state.title = `${kind === 'good' ? '良性' : kind === 'bad' ? '悪性' : '能力変化'}：${name}`;
+      icon.dataset.leciarStatusKind = kind;
     }
+    state.title = `${kind === 'good' ? '良性' : kind === 'bad' ? '悪性' : '能力変化'}：${name}`;
+  }
 
+  function applyStatusIconColors(root = document) {
+    const states = new Set();
+    if (root instanceof Element) {
+      if (root.matches('.status-icon-area .state[data-tooltip]')) states.add(root);
+      const parentState = root.closest('.status-icon-area .state[data-tooltip]');
+      if (parentState) states.add(parentState);
+    }
+    for (const state of root.querySelectorAll?.('.status-icon-area .state[data-tooltip]') ?? []) states.add(state);
+    for (const state of states) colorStatusState(state);
+  }
+
+  function appendStatusLegend() {
     if (document.querySelector('.leciar-status-legend')) return;
     const anchor = document.querySelector('.battle-start-call, .battle-result');
     if (!anchor) return;
@@ -450,10 +463,44 @@
     anchor.insertAdjacentElement('afterend', legend);
   }
 
+  function observeStatusIconChanges() {
+    const battle = document.querySelector('.battle-result');
+    if (!battle || battle.dataset.leciarStatusObserver === '1') return;
+    battle.dataset.leciarStatusObserver = '1';
+    const pending = new Set();
+    let animationFrame = 0;
+
+    const queue = (node) => {
+      const element = node instanceof Element ? node : node.parentElement;
+      if (!element) return;
+      pending.add(element);
+      if (animationFrame) return;
+      animationFrame = requestAnimationFrame(() => {
+        animationFrame = 0;
+        for (const root of pending) applyStatusIconColors(root);
+        pending.clear();
+      });
+    };
+
+    new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        if (mutation.type === 'attributes') queue(mutation.target);
+        for (const node of mutation.addedNodes) queue(node);
+      }
+    }).observe(battle, {
+      subtree: true,
+      childList: true,
+      attributes: true,
+      attributeFilter: ['style', 'data-tooltip', 'src'],
+    });
+  }
+
   function apply() {
     if (!document.querySelector('.battle-result')) return;
     installStyle();
     applyStatusIconColors();
+    appendStatusLegend();
+    observeStatusIconChanges();
     const { byActor, byActorAndSkill, originalByActorAndDisplay } = collect();
     appendImpactPanel(collectPreventedEffects(collectMutationImpacts()));
 
