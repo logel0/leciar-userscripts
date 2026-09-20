@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Leciel Arcadia: 戦闘詳細・変調内訳
 // @namespace    local.leciar-tools
-// @version      1.7.3
+// @version      1.8.0
 // @author        logel0
 // @contributor   GPT-5.6 (OpenAI Codex)
 // @description  【非公式・サイト運営者とは無関係】戦闘詳細の効果内訳を表示します。サイト更新により動作しなくなる場合があります。
@@ -37,6 +37,11 @@
   ];
   const effectNames = new Set(effects.map(([name]) => name));
   const addClass = 'leciar-mutation-breakdown-added';
+  const statusKinds = new Map([
+    ...['治癒', '平穏', '祝福', '加護', '保護'].map((name) => [name, 'good']),
+    ...['猛毒', '凍結', '呪縛', '麻痺', '阻害'].map((name) => [name, 'bad']),
+    ...['攻増', '守増', '速増', '攻減', '守減', '速減'].map((name) => [name, 'status']),
+  ]);
 
   // 保護・阻害で 0 になった試行、経過ターンによる状態変化は集計しない。
   // サイト側のHTMLでは、タグ境界の前後に空白がある場合とない場合が混在する。
@@ -156,6 +161,15 @@
       .leciar-mutation-impact-note { margin: 7px 0 0; color: rgba(255,255,255,.7); font-size: .85em; }
       .leciar-impact-positive { color: #a9edc1; }
       .leciar-impact-negative { color: #ffaaa8; }
+      .leciar-status-kind { box-sizing: border-box; border: 2px solid transparent; border-radius: 5px; }
+      .leciar-status-kind-good { background: rgba(46, 160, 90, .72) !important; border-color: #8ce8ac; }
+      .leciar-status-kind-bad { background: rgba(190, 55, 58, .72) !important; border-color: #ff9b99; }
+      .leciar-status-kind-status { background: rgba(190, 137, 24, .75) !important; border-color: #ffe08a; }
+      .leciar-status-legend { margin: 6px 0 10px; font-size: .78em; color: rgba(255,255,255,.82); }
+      .leciar-status-legend span { display: inline-block; margin-right: 8px; padding: 1px 6px; border-radius: 4px; }
+      .leciar-status-legend .good { background: rgba(46, 160, 90, .72); }
+      .leciar-status-legend .bad { background: rgba(190, 55, 58, .72); }
+      .leciar-status-legend .status { background: rgba(190, 137, 24, .75); }
     `;
     document.head.append(style);
   }
@@ -231,7 +245,16 @@
   }
 
   function emptyImpact() {
-    return { peaceContinuous: 0, freezeContinuous: 0, healingReceived: 0, poisonDamage: 0 };
+    return {
+      peaceContinuous: 0,
+      freezeContinuous: 0,
+      healingReceived: 0,
+      poisonDamage: 0,
+      protectionBlocks: 0,
+      obstructionBlocks: 0,
+      protectionEffects: new Map(),
+      obstructionEffects: new Map(),
+    };
   }
 
   function addImpact(target, field, amount) {
@@ -265,8 +288,42 @@
     return byUnit;
   }
 
+  // 「保護/阻害で無効化」の直後に出る 0 付与行を1回の防止として数える。
+  // 付与量ではなく、実際に防いだ試行回数と効果名を対象ごとに記録する。
+  function collectPreventedEffects(byUnit) {
+    const blockedPattern = /^(保護|阻害)\s*により次の効果が無効化された/;
+    const zeroGrantPattern = /^(.+?)\s*に\s*(.+?)\s*を\s*0\s*付与[！!]?$/;
+
+    for (const result of document.querySelectorAll('.result')) {
+      const blocker = result.textContent.replace(/\s+/g, ' ').trim().match(blockedPattern)?.[1];
+      if (!blocker) continue;
+      const next = result.nextElementSibling;
+      if (!next?.classList.contains('result')) continue;
+      const grant = next.textContent.replace(/\s+/g, ' ').trim().match(zeroGrantPattern);
+      if (!grant) continue;
+
+      const unit = grant[1].trim();
+      const effect = grant[2].trim();
+      if (!unit || !effect) continue;
+      const impact = byUnit.get(unit) ?? emptyImpact();
+      const countField = blocker === '保護' ? 'protectionBlocks' : 'obstructionBlocks';
+      const effectsField = blocker === '保護' ? 'protectionEffects' : 'obstructionEffects';
+      impact[countField] += 1;
+      impact[effectsField].set(effect, (impact[effectsField].get(effect) ?? 0) + 1);
+      byUnit.set(unit, impact);
+    }
+    return byUnit;
+  }
+
   function addImpactValues(target, source) {
-    for (const field of Object.keys(target)) target[field] += source[field] ?? 0;
+    for (const field of ['peaceContinuous', 'freezeContinuous', 'healingReceived', 'poisonDamage', 'protectionBlocks', 'obstructionBlocks']) {
+      target[field] += source[field] ?? 0;
+    }
+    for (const field of ['protectionEffects', 'obstructionEffects']) {
+      for (const [effect, count] of source[field] ?? []) {
+        target[field].set(effect, (target[field].get(effect) ?? 0) + count);
+      }
+    }
   }
 
   function battleTurns() {
@@ -285,6 +342,19 @@
     return cell;
   }
 
+  function blockedCell(count, effects, className) {
+    const cell = document.createElement('td');
+    cell.className = className;
+    cell.textContent = `${count.toLocaleString('ja-JP')}回`;
+    if (effects.size) {
+      cell.title = [...effects.entries()]
+        .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'ja'))
+        .map(([effect, value]) => `${effect} ${value}回`)
+        .join(' / ');
+    }
+    return cell;
+  }
+
   function impactRow(name, impact, turns, className = '') {
     const row = document.createElement('tr');
     if (className) row.className = className;
@@ -296,6 +366,8 @@
       impactCell(impact.freezeContinuous, 'leciar-impact-negative', turns, '−'),
       impactCell(impact.healingReceived, 'leciar-impact-positive', turns, '+'),
       impactCell(impact.poisonDamage, 'leciar-impact-negative', turns, '−'),
+      blockedCell(impact.protectionBlocks, impact.protectionEffects, 'leciar-impact-positive'),
+      blockedCell(impact.obstructionBlocks, impact.obstructionEffects, 'leciar-impact-negative'),
     );
     return row;
   }
@@ -319,18 +391,18 @@
     panel.className = 'battle-summary-table-wrap leciar-mutation-impact-panel';
     const note = document.createElement('p');
     note.className = 'leciar-mutation-impact-note';
-    note.textContent = '付与元スキルには紐付けず、平穏・凍結・治癒・猛毒が実際に発生させた効果を受け手ごとに合算しています。';
+    note.textContent = '実効果は受け手ごとに合算。保護・阻害は「無効化」の直後に0付与された効果を1回として数え、セルにマウスを重ねると内訳を表示します。';
     const table = document.createElement('table');
     table.className = 'battle-summary-table';
     const head = document.createElement('thead');
     const group = document.createElement('tr');
     group.className = 'group-row';
     const groupLabel = document.createElement('th');
-    groupLabel.colSpan = 5;
-    groupLabel.textContent = '変調による実効果';
+    groupLabel.colSpan = 7;
+    groupLabel.textContent = '変調・保護・阻害による実効果';
     group.append(groupLabel);
     const header = document.createElement('tr');
-    for (const text of ['対象', '平穏：連続値', '凍結：連続値', '治癒：被回復', '猛毒：被ダメ']) {
+    for (const text of ['対象', '平穏：連続値', '凍結：連続値', '治癒：被回復', '猛毒：被ダメ', '保護：防止', '阻害：防止']) {
       const cell = document.createElement('th');
       cell.textContent = text;
       header.append(cell);
@@ -348,11 +420,37 @@
     summaryWrap.insertAdjacentElement('afterend', panel);
   }
 
+  function applyStatusIconColors() {
+    const states = document.querySelectorAll('.status-icon-area .state[data-tooltip]');
+    if (!states.length) return;
+    for (const state of states) {
+      const name = state.dataset.tooltip?.trim() ?? '';
+      const kind = statusKinds.get(name);
+      if (!kind) continue;
+      state.classList.add('leciar-status-kind', `leciar-status-kind-${kind}`);
+      state.title = `${kind === 'good' ? '良性' : kind === 'bad' ? '悪性' : '能力変化'}：${name}`;
+    }
+
+    if (document.querySelector('.leciar-status-legend')) return;
+    const anchor = document.querySelector('.battle-start-call, .battle-result');
+    if (!anchor) return;
+    const legend = document.createElement('div');
+    legend.className = 'leciar-status-legend';
+    for (const [kind, label] of [['good', '良性'], ['bad', '悪性'], ['status', '能力変化']]) {
+      const item = document.createElement('span');
+      item.className = kind;
+      item.textContent = label;
+      legend.append(item);
+    }
+    anchor.insertAdjacentElement('afterend', legend);
+  }
+
   function apply() {
     if (!document.querySelector('.battle-result')) return;
     installStyle();
+    applyStatusIconColors();
     const { byActor, byActorAndSkill, originalByActorAndDisplay } = collect();
-    appendImpactPanel(collectMutationImpacts());
+    appendImpactPanel(collectPreventedEffects(collectMutationImpacts()));
 
     for (const row of document.querySelectorAll('tr.ally-row, tr.enemy-row')) {
       appendBreakdown(row.querySelector('.summary-name-cell'), byActor.get(rowActorName(row)) ?? emptyCounts());
