@@ -1,6 +1,6 @@
 # Leciel Arcadia Userscripts
 
-Leciel Arcadiaを使いやすくする、ユーザースクリプトマネージャー向けの非公式ツール集です。
+Leciel Arcadiaを使いやすくする、Violentmonkey向けの非公式ユーザースクリプト集です。
 
 本ツールはLeciel Arcadiaのサイト運営者とは無関係です。サイトの更新により、予告なく動作しなくなる可能性があります。
 
@@ -9,10 +9,6 @@ Leciel Arcadiaを使いやすくする、ユーザースクリプトマネージ
 ### 戦闘詳細・変調内訳
 
 戦闘詳細の与バフ・与デバフを、変調・能力増減などの効果種別ごとに表示します。
-
-- 平穏・凍結・治癒・猛毒が実際に発生させた効果量を対象別に集計
-- 保護・阻害が効果を無効化した回数を対象別に集計（セルのツールチップに効果別内訳）
-- キャラクターアイコン付近の状態を、良性・悪性・能力変化の3色に分類
 
 - ファイル: `leciar-battle-mutation-breakdown.user.js`
 - 対象: Leciel Arcadiaの戦闘結果ページ
@@ -33,13 +29,11 @@ Leciel Arcadiaを使いやすくする、ユーザースクリプトマネージ
 
 ## インストール
 
-1. ブラウザへ[Violentmonkey](https://violentmonkey.github.io/)などのユーザースクリプトマネージャーをインストールします。
+1. ブラウザへ[Violentmonkey](https://violentmonkey.github.io/)をインストールします。
 2. [配布ページ](https://logel0.github.io/leciar-userscripts/)を開きます。
 3. 使用するスクリプトの「インストール」を選択し、Violentmonkeyの確認画面で内容と権限を確認します。
 
 公開前のローカル確認では、各 `.user.js` ファイルをViolentmonkeyの管理画面へドラッグしてインストールできます。
-
-Violentmonkey、Tampermonkey、ScriptCatで利用できる構成です。Greasemonkeyでは`document-idle`の扱いが異なるため参考対応とします。
 
 ## 権限と通信
 
