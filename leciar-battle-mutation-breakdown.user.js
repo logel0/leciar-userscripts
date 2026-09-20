@@ -1,13 +1,14 @@
 // ==UserScript==
-// @name         Leciel Arcadia: 戦闘詳細・変調内訳
-// @namespace    local.leciar-tools
-// @version      1.8.3
+// @name         Leciel Arcadia: 戦闘詳細・変調内訳 [Beta]
+// @namespace    local.leciar-tools.beta
+// @version      1.8.3-beta.1
 // @author        logel0
 // @contributor   GPT-5.6 (OpenAI Codex)
-// @description  【非公式・サイト運営者とは無関係】戦闘詳細の効果内訳を表示します。サイト更新により動作しなくなる場合があります。
+// @description  【Beta・非公式・サイト運営者とは無関係】公開前の戦闘表示機能を試す開発版です。不具合を含む可能性があります。
 // @homepageURL  https://github.com/logel0/leciar-userscripts
 // @supportURL   https://github.com/logel0/leciar-userscripts/issues
-// @downloadURL  https://logel0.github.io/leciar-userscripts/leciar-battle-mutation-breakdown.user.js
+// @downloadURL  https://raw.githubusercontent.com/logel0/leciar-userscripts/beta/leciar-battle-mutation-breakdown.user.js
+// @updateURL    https://raw.githubusercontent.com/logel0/leciar-userscripts/beta/leciar-battle-mutation-breakdown.user.js
 // @match        https://rarirupj.com/leciar/*
 // @run-at       document-idle
 // @grant        none
