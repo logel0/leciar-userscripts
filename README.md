@@ -35,6 +35,13 @@ Leciel Arcadiaを使いやすくする、Violentmonkey向けの非公式ユー�
 
 公開前のローカル確認では、各 `.user.js` ファイルをViolentmonkeyの管理画面へドラッグしてインストールできます。
 
+### 安定版とBeta版
+
+- 安定版は`main`ブランチで管理し、GitHub Pagesから配布します。
+- Beta版は`beta`ブランチで管理し、戦闘詳細スクリプトのみ配布ページから別スクリプトとしてインストールできます。
+- Beta版は名前とnamespace、更新URLが安定版と異なるため、安定版を上書きしません。
+- 動作確認が終わった変更はPull Requestで`beta`から`main`へ反映します。
+
 ## 権限と通信
 
 - すべてのスクリプトは `@grant none` です。
