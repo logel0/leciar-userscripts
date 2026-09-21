@@ -13,13 +13,6 @@ Leciel Arcadiaを使いやすくする、Violentmonkey向けの非公式ユー�
 - ファイル: `leciar-battle-mutation-breakdown.user.js`
 - 対象: Leciel Arcadiaの戦闘結果ページ
 
-### キャラクターの戦闘結果一覧
-
-キャラクターページに、そのキャラクターを含む戦闘結果一覧へのボタンを追加します。
-
-- ファイル: `leciar-profile-battle-logs.user.js`
-- 対象: Leciel Arcadiaのキャラクターページ
-
 ### スキルからキャラクター検索
 
 スキル一覧のスキル名を、そのスキルを所持するキャラクターの検索リンクにします。
@@ -68,7 +61,7 @@ Leciel Arcadiaを使いやすくする、Violentmonkey向けの非公式ユー�
 
 ## ライセンス
 
-作者は `logel0` です。3本のユーザースクリプトは[MIT License](LICENSE)で提供し、利用、改変、再配布を認めます。
+作者は `logel0` です。2本のユーザースクリプトは[MIT License](LICENSE)で提供し、利用、改変、再配布を認めます。
 
 このライセンスはLeciel Arcadia本体、サイト上の文章、保存した戦闘ログ、キャラクター画像などの第三者素材には適用されません。
 
