@@ -4,6 +4,7 @@
 
 ## Unreleased
 
+- 「キャラクターの戦闘結果一覧」は公式機能の実装に伴い公開終了。
 - v1.8.3-beta.3: 仮想スクロールで再生成される状態アイコンへ、属性セレクターのCSSで常時着色。
 - v1.8.3-beta.2: スクロール時のDOM差し替えを監視し、背景色を失った状態アイコンだけ再着色。
 - v1.8.3: 状態アイコンの背景色を不透明色へ戻し、表示されない環境へ対応。
@@ -18,5 +19,8 @@
 ## 現在のバージョン
 
 - `leciar-battle-mutation-breakdown.user.js`: 1.8.3
-- `leciar-profile-battle-logs.user.js`: 1.0.3
 - `leciar-skill-search.user.js`: 1.0.3
+
+## 公開終了
+
+- `leciar-profile-battle-logs.user.js`: 1.0.3（公式機能の実装に伴い公開終了）
