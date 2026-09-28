@@ -17,6 +17,22 @@ Leciel Arcadiaを使いやすくする、ユーザースクリプトマネージ
 - ファイル: `leciar-battle-mutation-breakdown.user.js`
 - 対象: Leciel Arcadiaの戦闘結果ページ
 
+### SP・変調推移（Beta）
+
+キャラクターごとに、各ターンのSP計算時点におけるSP・連続値、実行した通算行動番号、変調深度を横並びで表示します。
+
+- 平穏・凍結を色付きの `◆`、その他の良性・悪性変調を種類数として1行にまとめ、個別深度を展開可能
+- 変調は通常行動のスキル効果適用後・経過処理前（SP増加量の判定状態）を表示
+- SP増減は平穏・凍結から推定せず、ログに記録された実測値を表示
+- SP増減はそのTURNから次のTURNのSP計算値までの差を表示し、標準の `+10` より少ない場合は紫、多い場合は緑で強調
+- 連続値はSP計算時点の実測値を表示
+- 行動番号はアクション直前のSPLvで色分けし、同じTURN内でSPLvが変化する連続行動にも対応
+- SPLv1・2・3到達後はSP値の文字色を変更し、離脱後は `-` を表示
+- 各変調行の右端に、離脱後を除いた付与TURNの割合を表示
+- 保護・阻害のサマリは `保護深度/阻害深度` として青・黄の数字で同時表示
+- ファイル: `leciar-sp-mutation-timeline.user.js`
+- 対象: Leciel Arcadiaの戦闘結果ページ
+
 ### スキルからキャラクター検索
 
 スキル一覧のスキル名を、そのスキルを所持するキャラクターの検索リンクにします。
@@ -47,6 +63,8 @@ Violentmonkey、Tampermonkey、ScriptCatで利用できる構成です。Greasem
 
 更新時は各スクリプトの `@version` を上げ、変更内容をRelease notesまたはコミットへ記録します。各スクリプトの `@downloadURL` はGitHub Pages上の恒久的なHTTPS URLを指定しています。
 
+戦闘ログ解析を変更する場合は、[戦闘ログ形式の注意点](docs/BATTLE_LOG_FORMAT.md)も確認してください。
+
 ## 不具合報告
 
 [GitHub Issues](https://github.com/logel0/leciar-userscripts/issues)に、対象ページ、発生した現象、期待する結果、スクリプトのバージョンを記載してください。公開してよい情報だけを添付し、Cookie、認証情報、非公開ログ、第三者の個人情報は投稿しないでください。
@@ -60,7 +78,7 @@ Violentmonkey、Tampermonkey、ScriptCatで利用できる構成です。Greasem
 
 ## ライセンス
 
-作者は `logel0` です。2本のユーザースクリプトは[MIT License](LICENSE)で提供し、利用、改変、再配布を認めます。
+作者は `logel0` です。3本のユーザースクリプトは[MIT License](LICENSE)で提供し、利用、改変、再配布を認めます。
 
 このライセンスはLeciel Arcadia本体、サイト上の文章、保存した戦闘ログ、キャラクター画像などの第三者素材には適用されません。
 
