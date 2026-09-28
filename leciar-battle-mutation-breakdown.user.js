@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Leciel Arcadia: 戦闘詳細・変調内訳 [Beta]
 // @namespace    local.leciar-tools.beta
-// @version      1.8.4-beta.1
+// @version      1.8.4-beta.2
 // @author        logel0
 // @contributor   GPT-5.6 (OpenAI Codex)
 // @description  【Beta・非公式・サイト運営者とは無関係】公開前の戦闘表示機能を試す開発版です。不具合を含む可能性があります。
@@ -41,12 +41,14 @@
   const statusKinds = new Map([
     ...['治癒', '平穏', '祝福', '加護', '保護'].map((name) => [name, 'good']),
     ...['猛毒', '凍結', '呪縛', '麻痺', '阻害'].map((name) => [name, 'bad']),
-    ...['攻増', '守増', '速増', '攻減', '守減', '速減'].map((name) => [name, 'status']),
+    ...['攻増', '守増', '速増'].map((name) => [name, 'increase']),
+    ...['攻減', '守減', '速減'].map((name) => [name, 'decrease']),
   ]);
   const statusBackgroundColors = {
     good: '#2ea05a',
     bad: '#be373a',
-    status: '#be8918',
+    increase: '#be8918',
+    decrease: '#7846b9',
   };
   const statusColorCss = [...statusKinds]
     .map(([name, kind]) => `.status-icon-area .state[data-tooltip="${name}"] > img.status-icon { background-color: ${statusBackgroundColors[kind]} !important; }`)
@@ -166,7 +168,8 @@
       .leciar-status-legend span { display: inline-block; margin-right: 8px; padding: 1px 6px; border-radius: 4px; }
       .leciar-status-legend .good { background: rgba(46, 160, 90, .72); }
       .leciar-status-legend .bad { background: rgba(190, 55, 58, .72); }
-      .leciar-status-legend .status { background: rgba(190, 137, 24, .75); }
+      .leciar-status-legend .increase { background: rgba(190, 137, 24, .75); }
+      .leciar-status-legend .decrease { background: rgba(120, 70, 185, .78); }
       ${statusColorCss}
     `;
     document.head.append(style);
@@ -430,7 +433,8 @@
       icon.style.backgroundColor = statusBackgroundColors[kind];
       icon.dataset.leciarStatusKind = kind;
     }
-    state.title = `${kind === 'good' ? '良性' : kind === 'bad' ? '悪性' : '能力変化'}：${name}`;
+    const label = { good: '良性', bad: '悪性', increase: '能力増加', decrease: '能力減少' }[kind];
+    state.title = `${label}：${name}`;
   }
 
   function applyStatusIconColors(root = document) {
@@ -450,7 +454,7 @@
     if (!anchor) return;
     const legend = document.createElement('div');
     legend.className = 'leciar-status-legend';
-    for (const [kind, label] of [['good', '良性'], ['bad', '悪性'], ['status', '能力変化']]) {
+    for (const [kind, label] of [['good', '良性'], ['bad', '悪性'], ['increase', '能力増加'], ['decrease', '能力減少']]) {
       const item = document.createElement('span');
       item.className = kind;
       item.textContent = label;
