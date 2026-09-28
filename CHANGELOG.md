@@ -4,6 +4,7 @@
 
 ## Unreleased
 
+- v1.8.4-beta.3: 状態アイコンの色分け凡例を戦闘開始位置からページ末尾へ移動。
 - v1.8.4-beta.2: 状態アイコンの攻減・守減・速減を、戦闘詳細の減少系表示に合わせた紫へ変更。凡例も能力増加と能力減少に分離。
 - v1.8.4-beta.1: 公式の元スキル名表示に対応し、スクリプト独自の元スキル名追加表示を終了。スキル詳細の一覧では `summary` の元スキル名だけを集計キーとして取得。
 - 「キャラクターの戦闘結果一覧」は公式機能の実装に伴い公開終了。
@@ -20,7 +21,7 @@
 
 ## 現在のバージョン
 
-- `leciar-battle-mutation-breakdown.user.js`: 1.8.4-beta.2
+- `leciar-battle-mutation-breakdown.user.js`: 1.8.4-beta.3
 - `leciar-skill-search.user.js`: 1.0.3
 
 ## 公開終了

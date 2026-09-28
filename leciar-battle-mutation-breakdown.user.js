@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Leciel Arcadia: 戦闘詳細・変調内訳 [Beta]
 // @namespace    local.leciar-tools.beta
-// @version      1.8.4-beta.2
+// @version      1.8.4-beta.3
 // @author        logel0
 // @contributor   GPT-5.6 (OpenAI Codex)
 // @description  【Beta・非公式・サイト運営者とは無関係】公開前の戦闘表示機能を試す開発版です。不具合を含む可能性があります。
@@ -450,8 +450,6 @@
 
   function appendStatusLegend() {
     if (document.querySelector('.leciar-status-legend')) return;
-    const anchor = document.querySelector('.battle-start-call, .battle-result');
-    if (!anchor) return;
     const legend = document.createElement('div');
     legend.className = 'leciar-status-legend';
     for (const [kind, label] of [['good', '良性'], ['bad', '悪性'], ['increase', '能力増加'], ['decrease', '能力減少']]) {
@@ -460,7 +458,9 @@
       item.textContent = label;
       legend.append(item);
     }
-    anchor.insertAdjacentElement('afterend', legend);
+    const mobileNavigation = document.querySelector('.btl-mobile-tabbar');
+    if (mobileNavigation) mobileNavigation.before(legend);
+    else document.body.append(legend);
   }
 
   function apply() {
