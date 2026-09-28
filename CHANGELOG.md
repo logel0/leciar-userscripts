@@ -4,6 +4,7 @@
 
 ## Unreleased
 
+- v1.8.4-beta.1: 公式の元スキル名表示に対応し、スクリプト独自の元スキル名追加表示を終了。スキル詳細の一覧では `summary` の元スキル名だけを集計キーとして取得。
 - 「キャラクターの戦闘結果一覧」は公式機能の実装に伴い公開終了。
 - v1.8.3-beta.3: 仮想スクロールで再生成される状態アイコンへ、属性セレクターのCSSで常時着色。
 - v1.8.3-beta.2: スクロール時のDOM差し替えを監視し、背景色を失った状態アイコンだけ再着色。
@@ -18,7 +19,7 @@
 
 ## 現在のバージョン
 
-- `leciar-battle-mutation-breakdown.user.js`: 1.8.3
+- `leciar-battle-mutation-breakdown.user.js`: 1.8.4-beta.1
 - `leciar-skill-search.user.js`: 1.0.3
 
 ## 公開終了

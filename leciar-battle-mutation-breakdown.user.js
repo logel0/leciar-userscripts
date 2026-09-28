@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Leciel Arcadia: 戦闘詳細・変調内訳 [Beta]
 // @namespace    local.leciar-tools.beta
-// @version      1.8.3-beta.3
+// @version      1.8.4-beta.1
 // @author        logel0
 // @contributor   GPT-5.6 (OpenAI Codex)
 // @description  【Beta・非公式・サイト運営者とは無関係】公開前の戦闘表示機能を試す開発版です。不具合を含む可能性があります。
@@ -100,22 +100,15 @@
   function rowSkillName(row) {
     const cell = row.querySelector('.skill-name-cell');
     if (!cell) return '';
-    const copy = cell.cloneNode(true);
+    // 公式のスキル詳細がある場合、ポップアップ内の取得条件・効果などを
+    // スキル名へ混ぜず、一覧に表示されている元スキル名だけを読む。
+    const source = cell.querySelector(':scope > details.battle-summary-skill > summary') ?? cell;
+    const copy = source.cloneNode(true);
     copy.querySelector(`.${addClass}`)?.remove();
-    copy.querySelector('.leciar-original-skill-name')?.remove();
     return copy.textContent
       .replace(/^\s*┗\s*/, '')
       .replace(/\s*\(\d+\)\s*$/, '')
       .trim();
-  }
-
-  function appendOriginalSkillName(cell, original) {
-    if (!cell || !original || cell.querySelector('.leciar-original-skill-name')) return;
-    const name = document.createElement('span');
-    name.className = 'leciar-original-skill-name';
-    name.textContent = ` 《${original}》`;
-    name.title = '元スキル名（集計キー）';
-    cell.append(name);
   }
 
   function renderCounts(counts) {
@@ -161,7 +154,6 @@
       .leciar-mutation-badge.increase { color: #ffbf84; background: rgba(205,105,25,.22); }
       .leciar-mutation-badge.decrease { color: #d3b2ff; background: rgba(120,70,185,.24); }
       .leciar-mutation-badge.stat { color: #f3f3f3; background: rgba(255,255,255,.12); }
-      .leciar-original-skill-name { color: rgba(255,255,255,.62); font-size: .9em; }
       .leciar-mutation-impact-panel { margin-top: 12px; }
       .leciar-mutation-impact-panel .battle-summary-table { white-space: nowrap; }
       .leciar-mutation-impact-panel .battle-summary-table th:not(:last-child),
@@ -490,7 +482,6 @@
       // 同じ変更名を複数の元スキルに付けた場合は、誤った合算を避けて表示しない。
       const original = originals?.size === 1 ? [...originals][0] : display;
       const cell = row.querySelector('.skill-name-cell');
-      if (originals?.size === 1 && original !== display) appendOriginalSkillName(cell, original);
       appendBreakdown(cell, byActorAndSkill.get(`${currentActor}\u0000${original}`) ?? emptyCounts());
     }
   }
